@@ -12,7 +12,7 @@ const client = new Client({
         GatewayIntentBits.Guilds,
         GatewayIntentBits.GuildMessages,
         GatewayIntentBits.MessageContent,
-        GatewayIntentBits.GuildPresences,
+        GatewayIntentBits.GuildPresences, // Đã bật trong code, cần bật cả trên Developer Portal
         GatewayIntentBits.GuildMembers
     ]
 });
@@ -35,10 +35,12 @@ client.on('messageCreate', async (message) => {
 
     if (isMentioned) {
         const guild = message.guild;
+        if (!guild) return; // Bảo vệ đề phòng tin nhắn đến từ DM (Direct Message)
+
         const targetUser = await guild.members.fetch(YOUR_DISCORD_ID).catch(() => null);
 
-        // Lấy trạng thái của bạn (online, idle, dnd, offline)
-        const status = targetUser?.presence?.status || 'offline';
+        // LÀM SẠCH VÀ SỬA LỖI TẠI ĐÂY: Kiểm tra presence an toàn để tuyệt đối không bị sập (crash)
+        const status = (targetUser && targetUser.presence) ? targetUser.presence.status : 'offline';
 
         // Nếu bạn offline hoặc invisible
         if (status === 'offline' || status === 'invisible') {
@@ -60,4 +62,3 @@ Hãy trả lời lịch sự, tự nhiên, báo rằng chủ nhân đang vắng 
 });
 
 client.login(process.env.DISCORD_TOKEN);
-h
